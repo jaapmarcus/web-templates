@@ -3,6 +3,7 @@
 #Define API Keys
 public='xxxxxxxxxx';
 private='xxxxxxxxxx';
+#!/bin/bash
 
 #Country / Lang settings
 language="en_US"
@@ -57,22 +58,22 @@ if [ ! -e /usr/local/hestia/data/users/$user/user.conf ]; then
 fi
 
 test=$(redis-cli INFO | grep ^db$redis)
-if [ ! -z  ]; then
+if [ ! -z "$test" ]; then
     echo "Redis Database $redis already exists"  
     exit;
 fi
 
 test=$(redis-cli INFO | grep ^db$backend)
-if [ ! -z  $test ]; then
+if [ ! -z  "$test" ]; then
     echo "Redis Database $backend already exists"  
     exit;
 fi
 
 v-add-user-composer $user
 rm /home/$user/.composer/composer
-wget -o /home/$user/.composer/composer https://getcomposer.org/composer-1.phar
+wget --tries=3 --timeout=15 --read-timeout=15 --waitretry=3 --no-dns-cache https://getcomposer.org/composer-1.phar --quiet -O /home/$user/.composer/composer
 chmod +x /home/$user/.composer/composer
-chown $user:user /home/$user/.composer/composer
+chown $user:$user /home/$user/.composer/composer
 
 v-change-user-shell $user 'bash'
 
@@ -125,4 +126,3 @@ runuser -l $user -c "/home/$user/web/$domain2/public_html/bin/magento setup:inst
 
 
 v-add-cron-job $user "*/5" "*" "*" "*" "*" "/usr/bin/php7.4 /home/$user/web/$domain2/public_html/bin/magento cron:run"
-
