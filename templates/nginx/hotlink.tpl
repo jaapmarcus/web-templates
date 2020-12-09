@@ -8,7 +8,7 @@ server {
     }
 
     location / {
-        proxy_pass      https://%ip%:%web_port%;
+        proxy_pass      http://%ip%:%web_port%;
 
         proxy_cache cache;
         proxy_cache_valid 15m;
