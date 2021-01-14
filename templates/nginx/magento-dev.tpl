@@ -39,7 +39,12 @@ server {
             add_header X-Frame-Options "SAMEORIGIN";
         }
     }
-
+    
+    location /sitemap.xml {
+       root  /home/%user%/web/%domain%/public_html;
+       try_files $uri sitemap.xml;
+    }
+    
     # PHP entry point for update application
     location ~* ^/update($|/) {
         root %docroot%;
