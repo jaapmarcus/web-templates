@@ -1,18 +1,21 @@
 #!/bin/bash
 
-#Define API Keys
-public='xxxxxxxxxx';
-private='xxxxxxxxxx';
-#!/bin/bash
-
 #Country / Lang settings
 language="en_US"
 currency="GBP"
 timezone="Europe/London"
 searchengine="elasticsearch7"
 
+source /etc/profile.d/hestia.sh
 
+# magent_keys.sh located in /root/ should contain the ssh files
+# format (With out #)
+# public='public_key_here';
+# private='private_key_here';
 
+source ~/keys.sh
+
+# Version / composer are optional
 while [ "$1" != "" ]; do
     case $1 in
         -u | --user )           shift
@@ -42,6 +45,12 @@ while [ "$1" != "" ]; do
                 ;;
         -b | --backend )		shift
                 backend="$1"
+                ;;
+        -v | --version )     shift
+                version="$1"
+                ;;
+        -c | --composer )    shift
+                composer="$1"
                 ;;						
     esac
     shift
@@ -57,21 +66,26 @@ if [ ! -e /usr/local/hestia/data/users/$user/user.conf ]; then
     exit;
 fi
 
-test=$(redis-cli INFO | grep ^db$redis)
+test=$(redis-cli INFO | grep ^db$redis:)
 if [ ! -z "$test" ]; then
     echo "Redis Database $redis already exists"  
     exit;
 fi
 
-test=$(redis-cli INFO | grep ^db$backend)
+test=$(redis-cli INFO | grep ^db$backend:)
 if [ ! -z  "$test" ]; then
     echo "Redis Database $backend already exists"  
     exit;
 fi
 
+# Create composer folders 
 v-add-user-composer $user
 rm /home/$user/.composer/composer
-wget --tries=3 --timeout=15 --read-timeout=15 --waitretry=3 --no-dns-cache https://getcomposer.org/composer-1.phar --quiet -O /home/$user/.composer/composer
+if [ -z $composer ]; then
+    wget --tries=3 --timeout=15 --read-timeout=15 --waitretry=3 --no-dns-cache https://getcomposer.org/composer-2.phar --quiet -O /home/$user/.composer/composer
+else
+    wget --tries=3 --timeout=15 --read-timeout=15 --waitretry=3 --no-dns-cache https://getcomposer.org/composer-$composer.phar --quiet -O /home/$user/.composer/composer    
+fi
 chmod +x /home/$user/.composer/composer
 chown $user:$user /home/$user/.composer/composer
 
@@ -98,12 +112,16 @@ echo "$domain2"
 runuser -l  $user -c "rm -f -r ~/web/$domain2/public_html/index.html"
 runuser -l  $user -c "rm -f -r ~/web/$domain2/public_html/robots.txt"
 
-cd /home/$user/web/$domain2/public_html/
+#cd /home/$user/web/$domain2/public_html/
 echo "/home/$user/web/$domain2/public_html/."
 
 
-runuser -l  $user -c "/home/$user/.composer/composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition /home/$user/web/$domain2/public_html/."
-echo "runuser -l  $user -c \"/home/$user/.composer/composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition /home/$user/web/$domain2/public_html/.\""
+if [ -z $version ]; then
+    runuser -l  $user -c "/home/$user/.composer/composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition /home/$user/web/$domain2/public_html/"
+else
+    runuser -l  $user -c "/home/$user/.composer/composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=$version /home/$user/web/$domain2/public_html/"
+
+fi
 
 
 db_user=$( head /dev/urandom | tr -dc a-z0-9 | head -c 6);
