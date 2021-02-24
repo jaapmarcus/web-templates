@@ -13,8 +13,11 @@ source /etc/profile.d/hestia.sh
 # public='public_key_here';
 # private='private_key_here';
 
+if [ ! -e "~/keys.sh" ]; then
+echo "~/keys.sh missing"
+    exit;
+fi
 source ~/keys.sh
-
 # Version / composer are optional
 while [ "$1" != "" ]; do
     case $1 in
