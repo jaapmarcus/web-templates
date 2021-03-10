@@ -10,7 +10,7 @@ server {
     location / {
         proxy_pass      http://%ip%:%web_port%;
 
-        proxy_cache cache;
+        proxy_cache %domain%;
         proxy_cache_valid 15m;
         proxy_cache_valid 404 15m;
         proxy_no_cache $no_cache;
@@ -50,11 +50,10 @@ server {
         proxy_pass      https://%ip%:%web_port%;
     }
 
-    location ~ /\.ht    {return 404;}
-    location ~ /\.svn/  {return 404;}
-    location ~ /\.git/  {return 404;}
-    location ~ /\.hg/   {return 404;}
-    location ~ /\.bzr/  {return 404;}
+    location ~ /\.(?!well-known\/) { 
+       deny all; 
+       return 404;
+    }
 
     include %home%/%user%/conf/web/%domain%/nginx.conf_*;
 }

@@ -58,9 +58,9 @@ server {
             rewrite ^/static/(version\d*/)?(.*)$ /static/$2 last;
         }
 
-        location ~* \.(ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2)$ {
-            add_header Cache-Control "max-age=31536000, public";
-            expires +1y;
+        location ~* \.(ico|jpg|jpeg|png|gif|svg|swf|eot|ttf|otf|woff|woff2)$ {
+            add_header Cache-Control "max-age=2592000, public";
+            expires +1m;
             add_header X-Frame-Options "SAMEORIGIN";
 
 
@@ -68,10 +68,20 @@ server {
                 rewrite ^/static/(version\d*/)?(.*)$ /static.php?resource=$2 last;
             }
         }
+        location ~* \.(js|css)$ {
+            add_header Cache-Control "max-age=86400, public";
+            expires +1d;
+            add_header X-Frame-Options "SAMEORIGIN";
+
+
+            if (!-f $request_filename) {
+                rewrite ^/static/(version\d*/)?(.*)$ /static.php?resource=$2 last;
+            }  
+        }
 
         location ~* \.(zip|gz|gzip|bz2|csv|xml)$ {
-            add_header Cache-Control "max-age=31536000, public";
-            expires +1y;
+            add_header Cache-Control "max-age=2592000, public";
+            expires +1m;
             add_header X-Frame-Options "SAMEORIGIN";
 
             if (!-f $request_filename) {
@@ -93,16 +103,21 @@ server {
             deny all;
         }
 
-        location ~* \.(ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2)$ {
-            add_header Cache-Control "max-age=31536000, public";
-            expires +1y;
+        location ~* \.(ico|jpg|jpeg|png|gif|svg|swf|eot|ttf|otf|woff|woff2)$ {
+            add_header Cache-Control "max-age=2592000, public";
+            expires +1m;
             add_header X-Frame-Options "SAMEORIGIN";
             try_files $uri $uri/ /get.php?$args;
         }
-
+        location ~* \.(js|css)${
+            add_header Cache-Control "max-age=86400, public";
+            expires +1d;
+            add_header X-Frame-Options "SAMEORIGIN";
+            try_files $uri $uri/ /get.php?$args;
+        }
         location ~* \.(zip|gz|gzip|bz2|csv|xml)$ {
-            add_header Cache-Control "max-age=31536000, public";
-            expires +1y;
+            add_header Cache-Control "max-age=2592000, public";
+            expires +1m;
             add_header X-Frame-Options "SAMEORIGIN";
             try_files $uri $uri/ /get.php?$args;
         }
@@ -133,13 +148,15 @@ server {
 
         fastcgi_index  index.php;
         fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        include     %home%/%user%/conf/web/%domain%/nginx.fastcgi_cache.conf*;
         include        /etc/nginx/fastcgi_params;
     }
 
 
     # Banned locations (only reached if the earlier PHP entry point regexes don't match)
-    location ~* (\.php$|\.htaccess$|\.git) {
-        deny all;
+    location ~ /\.(?!well-known\/) { 
+       deny all; 
+       return 404;
     }
 
     location /vstats/ {
