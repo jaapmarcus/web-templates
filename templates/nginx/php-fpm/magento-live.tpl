@@ -109,7 +109,7 @@ server {
             add_header X-Frame-Options "SAMEORIGIN";
             try_files $uri $uri/ /get.php?$args;
         }
-        location ~* \.(js|css)${
+        location ~* \.(js|css)$ {
             add_header Cache-Control "max-age=86400, public";
             expires +1d;
             add_header X-Frame-Options "SAMEORIGIN";
