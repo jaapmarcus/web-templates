@@ -32,7 +32,7 @@ server {
              access_log     /var/log/%web_system%/domains/%domain%.bytes bytes;
 	}
 
-        location ~* ^.+\.(%proxy_extentions%)$ {
+        location ~* ^.+\.(%proxy_extensions%)$ {
             proxy_cache    off;
             root           %sdocroot%;
             access_log     /var/log/%web_system%/domains/%domain%.log combined;
