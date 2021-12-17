@@ -6,6 +6,7 @@
 server {
     listen      %ip%:%proxy_port%;
     server_name %domain_idn% %alias_idn%;
+    index       index.php index.html index.htm;
         
     include %home%/%user%/conf/web/%domain%/nginx.forcessl.conf*;
 
