@@ -13,11 +13,11 @@ source /etc/profile.d/hestia.sh
 # public='public_key_here';
 # private='private_key_here';
 
-if [ ! -e "~/keys.sh" ]; then
-echo "~/keys.sh missing"
+if [ ! -e "/root/keys.sh" ]; then
+echo "/root/keys.sh missing"
     exit;
 fi
-source ~/keys.sh
+source /root/keys.sh
 # Version / composer are optional
 while [ "$1" != "" ]; do
     case $1 in
@@ -54,7 +54,10 @@ while [ "$1" != "" ]; do
                 ;;
         -c | --composer )    shift
                 composer="$1"
-                ;;						
+                ;;		
+        -w | --php )    shift
+        php="$1"
+        ;;						
     esac
     shift
 done
@@ -63,6 +66,10 @@ done
 
 ###############
 
+# check php version is set if not set 7.4 as default
+if [ -z "$php" ]; then 
+    php="7.4"
+fi
 # Check if user exists
 if [ ! -e /usr/local/hestia/data/users/$user/user.conf ]; then
     echo "$user does not exits";
@@ -120,9 +127,9 @@ echo "/home/$user/web/$domain2/public_html/."
 
 
 if [ -z $version ]; then
-    runuser -l  $user -c "/home/$user/.composer/composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition /home/$user/web/$domain2/public_html/"
+    runuser -l  $user -c "/usr/bin/php$php /home/$user/.composer/composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition /home/$user/web/$domain2/public_html/"
 else
-    runuser -l  $user -c "/home/$user/.composer/composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=$version /home/$user/web/$domain2/public_html/"
+    runuser -l  $user -c "/usr/bin/php$php /home/$user/.composer/composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition=$version /home/$user/web/$domain2/public_html/"
 
 fi
 
@@ -131,7 +138,7 @@ db_user=$( head /dev/urandom | tr -dc a-z0-9 | head -c 6);
 db_password=$( head /dev/urandom | tr -dc A-Za-z0-9 | head -c 16);
 fdb_user=$(echo "$user"_"$db_user");
 
-echo "$user_$db_user";
+echo "$user"_"$db_user"
 
 v-add-database $user $db_user $db_user $db_password "mysql" "localhost"
 
@@ -146,4 +153,12 @@ runuser -l $user -c "/home/$user/web/$domain2/public_html/bin/magento setup:inst
 --page-cache=redis --page-cache-redis-server=127.0.0.1 --page-cache-redis-db=$redis"
 
 
-v-add-cron-job $user "*/5" "*" "*" "*" "*" "/usr/bin/php7.4 /home/$user/web/$domain2/public_html/bin/magento cron:run"
+v-add-cron-job $user "*/5" "*" "*" "*" "*" "/usr/bin/php$php /home/$user/web/$domain2/public_html/bin/magento cron:run"
+
+if [ "$php" = '7.4' ]; then 
+    template="Magento-PHP-7_4"
+else
+    template="Magento-PHP-8_1"
+fi
+
+v-change-web-domain-backend-tpl $user $domain $template
