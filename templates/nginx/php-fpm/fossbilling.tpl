@@ -7,7 +7,7 @@
 server {
     listen      %ip%:%web_port%;
     server_name %domain_idn% %alias_idn%;
-    root        %sdocroot%/FOSSbilling/src/;
+    root        %sdocroot%/FOSSBilling/src/;
     index       index.php index.html index.htm;
 
     access_log  /var/log/nginx/domains/%domain%.log combined;
