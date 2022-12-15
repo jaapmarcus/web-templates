@@ -7,7 +7,7 @@
 server {
     listen      %ip%:%web_port%;
     server_name %domain_idn% %alias_idn%;
-    root        %sdocroot%/FOSSBilling/src/;
+    root        %sdocroot%;
     index       index.php index.html index.htm;
 
     access_log  /var/log/nginx/domains/%domain%.log combined;
@@ -18,7 +18,7 @@ server {
 
 
     location / {
-      #try_files $uri $uri/ /index.php?_url=$request_uri;
+    #try_files $uri $uri/ /index.php;
     rewrite ^/(.*)$ /index.php?_url=/$1;       
  
        location ~* ^.+\.(jpeg|jpg|png|webp|gif|bmp|ico|svg|css|js)$ {
@@ -36,8 +36,8 @@ server {
     }
     
     # Disable PHP execution in bb-uploads and bb-data
-     location ^~ /bb-uploads/ { }
-     location ^~ /bb-data/ {
+     location ^~ /uploads/ { }
+     location ^~ /data/ {
        deny all;
      }
     
