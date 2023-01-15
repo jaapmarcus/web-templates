@@ -39,7 +39,7 @@ server {
             include     %home%/%user%/conf/web/%domain%/nginx.fastcgi_cache.conf*;         
         }
     }
-    
+
     # Disable PHP execution in bb-uploads and bb-data
      location ^~ /uploads/ { }
      location ^~ /data/ {
