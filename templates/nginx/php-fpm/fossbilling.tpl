@@ -35,9 +35,11 @@ server {
         }
     }
     
-    # Disable PHP execution in bb-uploads and bb-data
-     location ^~ /uploads/ { }
-     location ^~ /data/ {
+    # Disable PHP execution in fb-uploads and fb-data
+     location ^~ /uploads/.*\.php$ { 
+       deny all;   
+     }
+     location ^~ /data/.*\.php$ {
        deny all;
      }
     
