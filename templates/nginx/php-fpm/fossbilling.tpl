@@ -35,13 +35,24 @@ server {
         }
     }
     
-    # Disable PHP execution in fb-uploads and fb-data
-     location ^~ /uploads/.*\.php$ { 
-       deny all;   
-     }
-     location ^~ /data/.*\.php$ {
-       deny all;
-     }
+    # Block access to sensitive files and return 404 to make it indistinguishable from a missing file
+    location ~* .(bak|conf|inc|ini|lock|log|old|sh|sql|twig|yaml|php)$ {
+		return 404;
+	}
+    
+    # Disable PHP execution in data and uploads, block public access to log and cache folders
+    location ^~ /data/.*\.php$ {
+        deny all;
+    }
+    location ^~ /data/uploads/.*\.php$ { 
+        deny all;   
+    }
+    location ^~ /data/cache/ {
+        return 404;
+    }
+    location ^~ /data/log/ {
+        return 404;
+    }
     
      location ~* ^/(css|img|js|flv|swf|download)/(.+)$ {
          expires off;
