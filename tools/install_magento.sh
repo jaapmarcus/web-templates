@@ -68,7 +68,7 @@ done
 
 # check php version is set if not set 7.4 as default
 if [ -z "$php" ]; then 
-    php="7.4"
+    php="8.3"
 fi
 # Check if user exists
 if [ ! -e /usr/local/hestia/data/users/$user/user.conf ]; then
@@ -155,10 +155,7 @@ runuser -l $user -c "/home/$user/web/$domain2/public_html/bin/magento setup:inst
 
 v-add-cron-job $user "*/5" "*" "*" "*" "*" "/usr/bin/php$php /home/$user/web/$domain2/public_html/bin/magento cron:run"
 
-if [ "$php" = '7.4' ]; then 
-    template="Magento-PHP-7_4"
-else
-    template="Magento-PHP-8_1"
-fi
+#if [ "$php" = '7.4' ]; then 
+template="Magento-PHP-8.3"
 
 v-change-web-domain-backend-tpl $user $domain $template
