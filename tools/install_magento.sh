@@ -113,11 +113,12 @@ if [  -z "$web" ]; then
     exit;
     fi
 fi
- echo -e "{\n\t\"http-basic\":\n\t\t{\n\t\t\"repo.magento.com\": {\n\t\t\t\"username\": \"$public\",\n\t\t\t\"password\": \"$private\"\n\t\t}\n\t}\n}" > /home/$user/.composer/auth.json
- chown $user:$user /home/$user/.composer/auth.json
+# Create auth.json for composer
+mkdir -p /home/$user/.config/composer 
+echo -e "{\n\t\"http-basic\":\n\t\t{\n\t\t\"repo.magento.com\": {\n\t\t\t\"username\": \"$public\",\n\t\t\t\"password\": \"$private\"\n\t\t}\n\t}\n}" >  /home/$user/.config/composer/auth.json
+chown $user:$user  /home/$user/.config/composer/auth.json
 
 domain2=${domain//www./}
-echo "$domain2"
 
 runuser -l  $user -c "rm -f -r ~/web/$domain2/public_html/index.html"
 runuser -l  $user -c "rm -f -r ~/web/$domain2/public_html/robots.txt"
@@ -150,7 +151,7 @@ runuser -l $user -c "/home/$user/web/$domain2/public_html/bin/magento setup:inst
 --currency=$currency --timezone=$timezone --use-rewrites=1 \
 --search-engine=elasticsearch7 --use-secure-admin=1 --use-secure=1 \
 --cache-backend=redis --cache-backend-redis-server=127.0.0.1 --cache-backend-redis-db=$backend \
---page-cache=redis --page-cache-redis-server=127.0.0.1 --page-cache-redis-db=$redis"
+--page-cache=redis --page-cache-redis-server=127.0.0.1 --page-cache-redis-db=$redis --elasticsearch-index-prefix $user" 
 
 
 v-add-cron-job $user "*/5" "*" "*" "*" "*" "/usr/bin/php$php /home/$user/web/$domain2/public_html/bin/magento cron:run"
